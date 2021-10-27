@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 
 import * as C from './styles';
-import BarberLogo from '../../assets/barber.svg';
 import SignInput from '../../components/SingInput';
+import SingButton from '../../components/SingButton';
+import SignMessage from '../../components/SignMessage';
+import Container from '../../components/Container';
 
+import BarberLogo from '../../assets/barber.svg';
 import EmailIcon from '../../assets/email.svg';
 import LockIcon from '../../assets/lock.svg';
 
@@ -13,33 +16,31 @@ export default () => {
   const [ loading, setLoading ] = useState(false);
 
   return (
-    <C.Container>
+    <Container>
       <BarberLogo width="100%" height="160" />
 
       <C.InputArea>
         <SignInput 
           IconSvg={EmailIcon} 
-          placeholder="Digite seu e-mail"
+          placeholder="seu@email.com"
           value={email}
           onChangeText={t => setEmail(t)}
         />
         <SignInput 
           IconSvg={LockIcon}
-          placeholder="Digite sua senha"
+          placeholder="*******"
           value={password}
           onChangeText={t => setPassword(t)}
           password
         />
 
-        <C.CustomButton>
-          <C.CustomButtonText>Entrar</C.CustomButtonText>
-        </C.CustomButton>
+        <SingButton value="Entrar" loading={loading} />
       </C.InputArea>
 
-      <C.SignMessageButton>
-        <C.SignMessageButtonText>Ainda não possui uma conta?</C.SignMessageButtonText>
-        <C.SignMessageButtonTextBold>Cadastra-se</C.SignMessageButtonTextBold>
-      </C.SignMessageButton>
-    </C.Container>
+      <SignMessage
+        msg="Ainda não possui uma conta?"
+        bold="Cadastra-se"
+      />
+    </Container>
   );
 }
