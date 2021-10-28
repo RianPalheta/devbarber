@@ -8,7 +8,6 @@ export const Container = styled.SafeAreaView`
   background-color: #63C2D1;
 `;
 
-
 export default ({ children }) => {
   return (
     <Container>
