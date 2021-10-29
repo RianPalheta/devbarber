@@ -22,9 +22,10 @@ export default () => {
   const [ coords, setCoords ] = useState(null);
   const [ page, setPage ] = useState(1);
   const [ loading, setLoading ] = useState(false);
-  const [ locationFinderloading, setLocationFinderLoading ] = useState(false);
   const [ refreshing, setRefreshing ] = useState(false);
+  const [ finishList, setFinishList ] = useState(false);
   const [ locationText, setLocationText ] = useState('');
+  const [ locationFinderloading, setLocationFinderLoading ] = useState(false);
 
   const handleLocationFinder = async () => {
     setCoords(null);
@@ -57,7 +58,7 @@ export default () => {
   }
 
   const getBarbers = async (address = null, geo = null) => {
-    if(loading) return;
+    if(loading || finishList) return;
     
     let data = { page };  
     // if(geo) data.geo = true;
@@ -74,24 +75,18 @@ export default () => {
 
     setLoading(true);
     let res = await Api.getBarbers(data);
-    setLoading(false);
-    setLocationFinderLoading(false);
-    
-    if(page === 1) setList([]);
     if(res.error === '') {
-      if(page === 1) {
-        setList(res.data);
-      } else {
-        setList([ ...list, ...res.data ]);
-      }
-
+      setList([ ...list, ...res.data ]);
+      setPage(page + 1);
       if(res.loc) setLocationText(res.loc);
+      if(res.data.length === 0) setFinishList(true);
     } else if(res.error !== 'OFFLINE') {
       ToastAndroid.show(res.error, ToastAndroid.SHORT);
     } else if(res.error === 'OFFLINE') {
       ToastAndroid.show("Falha na conexão! Tente novamente mais tarde.", ToastAndroid.SHORT);
     }
-
+    setLoading(false);
+    setLocationFinderLoading(false);
   }
   const onRefresh = async () => {
     setRefreshing(false);
@@ -151,15 +146,20 @@ export default () => {
     </>
   );
   const FooterArea = () => (
-    <C.FooterArea>
-      { !loading || !refreshing &&
-        <>
-          {Array.from({length: 4}).map((_, k) => (
-            <BarberItemSketeton key={k}/>
-          ))}
-        </>
+    <>
+      { !finishList &&
+        <C.FooterArea>
+          { list.length === 0 ?
+            <>  
+              {Array.from({length: 4}).map((_, k) => (
+                <BarberItemSketeton key={k}/>
+              ))}
+            </>
+            : <BarberItemSketeton />
+          }
+        </C.FooterArea>
       }
-    </C.FooterArea>
+    </>
   );
   
   return (
@@ -173,17 +173,18 @@ export default () => {
             />
           }
           data={list}
-          renderItem={data => <BarberItem item={data.item} navigation={navigation} />}
-          keyExtractor={i => i.id}
           initialNumToRender={20}
-          ListEmptyComponent={NoneLocationFinder}
+          keyExtractor={i => i.id}
           onEndReachedThreshold={0.2}
           onEndReached={onEndReached}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={NoneLocationFinder}
           getItemLayout={(data, index) => (
             { length: 130, offset: 130 * index, index }
           )}
           ListHeaderComponent={HeaderArea}
           ListFooterComponent={FooterArea}
+          renderItem={data => <BarberItem item={data.item} navigation={navigation} />}
         />
     </C.Container>
   );

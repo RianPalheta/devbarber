@@ -79,4 +79,10 @@ export default {
       return await request('POST', `barber/${id}/favorite`, {}, token);
     } catch (error) { return { error: 'OFFLINE' } }
   },
+  async setAppointment(id, data) {
+    let token = await this.getToken();
+    try {
+      return await request('POST', `barber/${id}/appointment`, data, token);
+    } catch (error) { return { error: 'OFFLINE' } }
+  },
 };

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ToastAndroid } from 'react-native';
 import styled from 'styled-components/native';
 import { Modalize } from 'react-native-modalize';
 
+import Api from '../services/Api';
 import CloseIcon from '../assets/expand.svg';
 import NextIcon from '../assets/nav_next.svg';
 import PrevIcon from '../assets/nav_prev.svg';
@@ -136,6 +138,8 @@ export const FinishButtonText = styled.Text`
   font-weight: bold;
 `;
 
+const LoadingIcon = styled.ActivityIndicator``;
+
 const months = [ 
   'Janeiro', 'Fevereiro', 'Março',
   'Abril', 'Maio', 'Junho',
@@ -161,6 +165,7 @@ export default ({ show, setShowModal, user, service, navigation }) => {
 
   const [ disabledPrev, setDisabledPrev ] = useState(false);
   const [ disabledNext, setDisabledNext ] = useState(false);
+  const [ loading, setLoading ] = useState(false);
 
   useEffect(() => {
     let today = new Date();
@@ -254,14 +259,45 @@ export default ({ show, setShowModal, user, service, navigation }) => {
     setSelectedMonth( mountDate.getMonth() );
     setSelectedDay(0);
   }
-  const handleFinish = () => {
-    alert('Finalizar agendamento');
+  const handleFinish = async () => {
+    if(
+      user.id &&
+      service != null &&
+      selectedYear > 0 && 
+      selectedMonth > 0 && 
+      selectedDay > 0 && 
+      selectedHour != null
+      ) {
+
+      setLoading(true);
+      let res = await Api.setAppointment(
+        user.id,
+        {
+          service: user.services[service].id,
+          year: selectedYear,
+          month: selectedMonth + 1,
+          day: selectedDay,
+          hour: selectedHour
+        }
+      );
+      if(res.error === '') {
+        setShowModal(false);
+        ToastAndroid.show("Agendamento feito com sucesso!", ToastAndroid.SHORT);
+        navigation.navigate('Appointments');
+      } else if(res.error !== 'OFFLINE') {
+        ToastAndroid.show(res.error, ToastAndroid.SHORT);
+      } else if(res.error === 'OFFLINE') {
+        ToastAndroid.show("Falha na conexão! Tente novamente mais tarde.", ToastAndroid.SHORT);
+      }
+      setLoading(false);
+    } else {
+      ToastAndroid.show("Preencha todos os dados!", ToastAndroid.SHORT);
+    }
   }
 
   return (
     <Modalize
       ref={modalRef}
-      // snapPoint={550}
       modalHeight={550}
       onClose={() => setShowModal(false)}
     >
@@ -340,7 +376,10 @@ export default ({ show, setShowModal, user, service, navigation }) => {
           }
 
           <FinishButton onPress={handleFinish}>
-            <FinishButtonText>Finalizar Agendamento</FinishButtonText>
+            { loading 
+              ? <LoadingIcon color="#fff" size="large" />
+              : <FinishButtonText>Finalizar Agendamento</FinishButtonText>
+            }
           </FinishButton>
         </ModalBody>
       </ModalArea>
