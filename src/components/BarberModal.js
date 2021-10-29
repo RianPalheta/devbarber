@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components/native';
+import { Modalize } from 'react-native-modalize';
 
 import CloseIcon from '../assets/expand.svg';
 import NextIcon from '../assets/nav_next.svg';
 import PrevIcon from '../assets/nav_prev.svg';
 
-export const Modal = styled.Modal``;
 export const ModalArea = styled.View`
   flex: 1;
   justify-content: flex-end;
@@ -150,6 +150,8 @@ const days = [
 ];
 
 export default ({ show, setShowModal, user, service, navigation }) => {
+  const modalRef = useRef(null);
+
   const [ selectedYear, setSelectedYear ] = useState(0);
   const [ selectedMonth, setSelectedMonth ] = useState(0);
   const [ selectedDay, setSelectedDay ] = useState(0);
@@ -226,6 +228,13 @@ export default ({ show, setShowModal, user, service, navigation }) => {
     setSelectedHour(null);
   }, [user, selectedDay]);
 
+  useEffect(() => {
+    if(show) 
+      modalRef.current?.open();
+    else
+      modalRef.current?.close();
+  }, [show]);
+
   const handleCloseModal = () => setShowModal(false);
   const handlePrevDate = () => {
     if(disabledPrev) return;
@@ -250,11 +259,11 @@ export default ({ show, setShowModal, user, service, navigation }) => {
   }
 
   return (
-    <Modal
-      transparent
-      visible={show}
-      statusBarTranslucent
-      animationType="slide"
+    <Modalize
+      ref={modalRef}
+      // snapPoint={550}
+      modalHeight={550}
+      onClose={() => setShowModal(false)}
     >
       <ModalArea>
         <ModalBody>
@@ -335,6 +344,6 @@ export default ({ show, setShowModal, user, service, navigation }) => {
           </FinishButton>
         </ModalBody>
       </ModalArea>
-    </Modal>
+    </Modalize>
   );
 }
