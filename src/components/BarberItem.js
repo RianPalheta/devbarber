@@ -1,4 +1,5 @@
 import React from 'react';
+
 import styled from 'styled-components/native';
 
 import Stars from './Stars';
@@ -9,7 +10,7 @@ export const Area = styled.View`
   flex-direction: row;
   margin-bottom: 20px;
   border-radius: 20px;
-  /* opacity: ${props => props.open ? 1 : .8}; */
+  opacity: ${props => props.open ? 1 : .8};
 `;
 export const Avatar = styled.Image`
   width: 88px;
@@ -38,7 +39,16 @@ export const SeeProfileButtonText = styled.Text`
   color: #268596;
 `;
 
-export default ({ item }) => {
+export default ({ item, navigation }) => {
+  const handleProfileBarber = () => {
+    navigation.navigate('Barber', {
+      id: item.id,
+      avatar: item.avatar,
+      name: item.name,
+      stars: item.stars,
+    });
+  }
+
   return (
     <Area open={item.open}>
       <Avatar source={{ uri: item.avatar }} />
@@ -47,7 +57,7 @@ export default ({ item }) => {
 
         <Stars stars={item.stars} showNumber />
         
-        <SeeProfileButton>
+        <SeeProfileButton onPress={handleProfileBarber}>
           <SeeProfileButtonText>Ver Perfil</SeeProfileButtonText>
         </SeeProfileButton>
       </InfoArea>

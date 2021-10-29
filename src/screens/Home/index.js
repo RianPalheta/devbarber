@@ -22,6 +22,7 @@ export default () => {
   const [ coords, setCoords ] = useState(null);
   const [ page, setPage ] = useState(1);
   const [ loading, setLoading ] = useState(false);
+  const [ locationFinderloading, setLocationFinderLoading ] = useState(false);
   const [ refreshing, setRefreshing ] = useState(false);
   const [ locationText, setLocationText ] = useState('');
 
@@ -33,7 +34,9 @@ export default () => {
       : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
     );
     if(result === 'granted') {
+      setLocationFinderLoading(true);
       setLoading(true);
+      setList([]);
       
       Geolocation.getCurrentPosition(async info => {
         setCoords(info.coords);
@@ -48,13 +51,16 @@ export default () => {
   }
   const handleLocationSearch = () => {
     setCoords(null);
-    getBarbers();
+    setList([]);
+    setPage(1);
+    getBarbers(locationText);
   }
 
-  const getBarbers = async (address = null) => {
+  const getBarbers = async (address = null, geo = null) => {
     if(loading) return;
     
     let data = { page };  
+    // if(geo) data.geo = true;
     if(coords && address) {
       data.lat = coords.latitude;
       data.lng = coords.longitude;
@@ -69,7 +75,8 @@ export default () => {
     setLoading(true);
     let res = await Api.getBarbers(data);
     setLoading(false);
-    console.log(data, res);
+    setLocationFinderLoading(false);
+    
     if(page === 1) setList([]);
     if(res.error === '') {
       if(page === 1) {
@@ -103,7 +110,7 @@ export default () => {
     handleLocationFinder();
   }, []);
   useEffect(() => {
-    getBarbers();
+    getBarbers(null, true);
   }, [coords]);
 
   const HeaderArea = () => (
@@ -122,7 +129,7 @@ export default () => {
           onChangeText={t=>setLocationText(t)}
           onEndEditing={handleLocationSearch}
         />
-        { loading
+        { locationFinderloading
           ? <C.LoadingIcon size="small" color="#FFF" />
           : <C.LocationFinder onPress={handleLocationFinder} disabled={loading}>
               <MyLocationIcon width="24" height="24" fill="#FFF" />
@@ -166,7 +173,7 @@ export default () => {
             />
           }
           data={list}
-          renderItem={BarberItem}
+          renderItem={data => <BarberItem item={data.item} navigation={navigation} />}
           keyExtractor={i => i.id}
           initialNumToRender={20}
           ListEmptyComponent={NoneLocationFinder}
