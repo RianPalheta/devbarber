@@ -127,7 +127,7 @@ export default () => {
               <C.ServiceItem key={k}>
                 <C.ServiceInfo>
                   <C.ServiceName numberOfLines={1} ellipsizeMode="tail">{ i.name }</C.ServiceName>
-                  <C.ServicePrice>R$ { i.price.toFixed(2).replace('.', ',') }</C.ServicePrice>
+                  <C.ServicePrice>{ i.price }</C.ServicePrice>
                 </C.ServiceInfo>
 
                 <C.ServiceChooseButton onPress={() => handleServiceChoose(k)}>

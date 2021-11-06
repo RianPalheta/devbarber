@@ -30,7 +30,7 @@ const request = async (method, endpoint, params, token = null) => {
       body = JSON.stringify(params);
     break;
   }
-  
+  console.log(fullUrl);
   let req = await fetch(fullUrl, { body, method, headers });
 
   return await req.json();
@@ -83,6 +83,12 @@ export default {
     let token = await this.getToken();
     try {
       return await request('POST', `barber/${id}/appointment`, data, token);
+    } catch (error) { return { error: 'OFFLINE' } }
+  },
+  async search(data) {
+    let token = await this.getToken();
+    try {
+      return await request('GET', 'search', data, token);
     } catch (error) { return { error: 'OFFLINE' } }
   },
 };

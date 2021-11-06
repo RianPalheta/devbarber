@@ -318,7 +318,7 @@ export default ({ show, setShowModal, user, service, navigation }) => {
             <ModalItem>
               <ServiceInfo>
                 <ServiceName numberOfLines={1} ellipsizeMode="tail">{ user.services[service].name }</ServiceName>
-                <ServicePrice>R$ { user.services[service].price.toFixed(2).replace('.', ',') }</ServicePrice>
+                <ServicePrice>{ user.services[service].price }</ServicePrice>
               </ServiceInfo>
             </ModalItem>
           }
